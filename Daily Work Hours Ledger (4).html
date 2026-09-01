@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>LDGR — daily hours log</title>
+<meta name="apple-mobile-web-app-title" content="LDGR">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=Fredoka:wght@600&family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --red:#ED2127;
+    --carrot:#F15623;
+    --orange:#F2A727;
+    --yellowgreen:#95C843;
+    --seagreen:#00B9B0;
+    --bluebell:#4090CE;
+    --grape:#9F4198;
+    --rosewood:#CB005C;
+
+    --bg:#fbfaf6;
+    --card:#ffffff;
+    --ink:#242220;
+    --ink-dim:#8a8578;
+    --line:#e7e2d5;
+    --danger:#b23c2e;
+    --ok:#227a56;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding:28px 16px 60px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{width:100%;max-width:420px;}
+
+  .stripe{
+    height:4px;margin:0 0 20px;border-radius:4px;
+    background:linear-gradient(90deg,
+      var(--red) 0 12.5%, var(--carrot) 12.5% 25%, var(--orange) 25% 37.5%,
+      var(--yellowgreen) 37.5% 50%, var(--seagreen) 50% 62.5%, var(--bluebell) 62.5% 75%,
+      var(--grape) 75% 87.5%, var(--rosewood) 87.5% 100%);
+  }
+  .topbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;}
+  .brand{
+    font-family:'Fraunces',Georgia,serif;
+    font-weight:700;
+    font-size:31px;
+    letter-spacing:0.2px;
+    margin:0 0 4px;
+    color:var(--rosewood);
+  }
+  .brand-sub{
+    font-size:13px;
+    color:var(--ink-dim);
+    margin:0;
+  }
+  .gear{
+    background:var(--bluebell);border:none;color:#fff;
+    width:38px;height:38px;border-radius:50%;font-size:16px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .gear:active{transform:scale(0.94);}
+
+  .settings-panel{
+    background:#fff;border-radius:12px;
+    padding:16px 18px;margin-bottom:18px;border:1px solid var(--line);
+  }
+  .settings-panel label{
+    display:block;font-size:12px;color:var(--ink-dim);margin-bottom:6px;font-weight:500;
+  }
+  .settings-panel input{
+    width:100%;background:var(--bg);border:1px solid var(--line);
+    color:var(--ink);border-radius:8px;padding:9px 12px;font-size:14px;
+    font-family:'Inter',sans-serif;
+  }
+  .settings-panel .hint{font-size:12px;color:var(--ink-dim);margin-top:9px;line-height:1.55;}
+  .save-btn{
+    margin-top:11px;background:none;border:1px solid var(--seagreen);color:var(--seagreen);
+    border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;
+  }
+  .save-btn:active{background:rgba(0,185,176,0.08);}
+  .custom-project-row{
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:13px;color:var(--ink);padding:6px 0;
+  }
+  .custom-project-row .swatch{
+    display:inline-block;width:9px;height:9px;border-radius:50%;
+    margin-right:8px;vertical-align:middle;
+  }
+  .custom-project-row .remove-project{
+    background:none;border:none;color:#c2bcaa;font-size:13px;cursor:pointer;
+  }
+
+  .ledger-line{
+    display:flex;justify-content:space-between;align-items:center;
+    background:#fff;border:1px solid var(--line);border-radius:12px;
+    padding:15px 20px;margin-bottom:18px;
+  }
+  .ledger-line .stat{text-align:left;}
+  .ledger-line .stat:last-child{text-align:right;}
+  .ledger-line .num{
+    font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:22px;
+    display:block;line-height:1.1;color:var(--ink);
+  }
+  .ledger-line .stat:first-child .num{color:var(--seagreen);}
+  .ledger-line .stat:last-child .num{color:var(--rosewood);}
+  .ledger-line .lbl{font-size:12px;color:var(--ink-dim);margin-top:3px;}
+
+  .card{
+    background:var(--card);
+    color:var(--ink);
+    border-radius:var(--radius);
+    padding:22px 20px 24px;
+    margin-bottom:20px;
+    border:1px solid var(--line);
+  }
+  .field{margin-bottom:16px;}
+  .field:last-of-type{margin-bottom:0;}
+  .field label{
+    display:block;font-size:12px;color:var(--ink-dim);margin-bottom:6px;font-weight:500;
+  }
+  select{
+    width:100%;
+    border:1px solid var(--line);
+    background:var(--bg);
+    border-radius:8px;
+    padding:11px 12px;
+    font-size:16px;
+    color:var(--ink);
+    font-family:inherit;
+    appearance:none;
+    -webkit-appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1L6 6L11 1' stroke='%238a8578' stroke-width='1.5' fill='none' stroke-linecap='round'/></svg>");
+    background-repeat:no-repeat;
+    background-position:right 14px center;
+    padding-right:34px;
+  }
+  input[type=number], textarea{
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    border:1px solid var(--line);
+    background:var(--bg);
+    border-radius:8px;
+    padding:11px 12px;
+    font-size:16px;
+    color:var(--ink);
+    font-family:inherit;
+  }
+  .date-field{position:relative;}
+  .date-display{
+    border:1px solid var(--line);
+    background:var(--bg);
+    border-radius:8px;
+    padding:11px 12px;
+    font-size:16px;
+    color:var(--ink);
+    font-family:inherit;
+  }
+  .date-native{
+    position:absolute;inset:0;width:100%;height:100%;
+    opacity:0;border:0;padding:0;margin:0;background:transparent;
+  }
+  .date-field:focus-within .date-display{
+    border-color:var(--seagreen);
+    box-shadow:0 0 0 3px rgba(0,185,176,0.1);
+  }
+  input:focus, select:focus, textarea:focus{
+    outline:none;border-color:var(--seagreen);
+    box-shadow:0 0 0 3px rgba(0,185,176,0.1);
+  }
+  textarea{resize:vertical;min-height:72px;line-height:1.5;}
+  .hours-row{display:flex;align-items:center;gap:8px;}
+  .hours-row input{text-align:center;font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:600;}
+  .step-btn{
+    width:42px;height:42px;flex-shrink:0;border-radius:50%;border:1.5px solid var(--orange);
+    background:#fff;font-size:18px;color:var(--orange);cursor:pointer;font-family:inherit;font-weight:600;
+  }
+  .step-btn:active{background:var(--orange);color:#fff;}
+
+  .submit-btn{
+    width:100%;margin-top:20px;position:relative;
+    background:var(--rosewood);color:#fff;
+    border:none;border-radius:999px;
+    padding:14px;font-size:15px;font-weight:600;
+    cursor:pointer;letter-spacing:0.2px;font-family:'Inter',sans-serif;
+    box-shadow:0 3px 0 #96003f;
+  }
+  .submit-btn:active{transform:translateY(2px);box-shadow:0 1px 0 #96003f;}
+  .submit-btn:disabled{opacity:0.5;box-shadow:none;}
+
+  .stamp-mark{
+    position:absolute;top:-14px;right:10px;
+    font-family:'Fredoka',sans-serif;font-weight:600;font-size:12px;letter-spacing:0.3px;
+    color:#fff;background:var(--seagreen);border-radius:999px;
+    padding:4px 11px;
+    transform:rotate(-5deg) scale(0.6);opacity:0;
+    pointer-events:none;
+  }
+  .stamp-mark.show{
+    animation:stampIn 1.3s ease forwards;
+  }
+  @keyframes stampIn{
+    0%{opacity:0;transform:rotate(-5deg) scale(0.6);}
+    20%{opacity:1;transform:rotate(-5deg) scale(1.1);}
+    30%{transform:rotate(-5deg) scale(1);}
+    78%{opacity:1;transform:rotate(-5deg) scale(1);}
+    100%{opacity:0;transform:rotate(-5deg) scale(1);}
+  }
+
+  .status{
+    font-size:13px;margin-top:12px;text-align:center;min-height:16px;
+  }
+  .status.ok{color:var(--ok);}
+  .status.err{color:var(--danger);}
+
+  .history{margin-top:6px;}
+  .history h3{
+    font-family:'Space Grotesk',sans-serif;font-weight:600;
+    font-size:15px;color:var(--ink);
+    margin:0 0 10px;
+  }
+  .entry{
+    padding:12px 14px 11px;border-radius:10px;margin-bottom:8px;
+    background:#fff;border:1px solid var(--line);
+  }
+  .entry-top{display:flex;align-items:baseline;gap:8px;}
+  .entry-desc{
+    flex:1 1 auto;color:var(--ink);font-size:14px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .entry-hours{
+    flex:0 0 auto;font-family:'Space Grotesk',sans-serif;font-weight:600;
+    color:var(--ink);font-size:14px;
+  }
+  .entry-meta{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-top:8px;
+  }
+  .entry-tag{
+    font-size:11px;color:#fff;font-weight:600;
+    border-radius:999px;
+    padding:3px 10px;
+  }
+  .entry-date{font-size:11px;color:var(--ink-dim);margin-left:8px;}
+  .entry-status{font-size:11px;}
+  .entry-status.synced{color:var(--ok);}
+  .entry-status.unsynced{color:var(--orange);}
+  .del-btn{
+    background:none;border:none;color:#c2bcaa;font-size:14px;cursor:pointer;
+    padding:0 0 0 8px;flex:0 0 auto;
+  }
+  .empty{color:var(--ink-dim);font-size:13px;padding:10px 2px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="stripe"></div>
+
+  <div class="topbar">
+    <div>
+      <p class="brand"><span style="color:var(--rosewood);">L</span><span style="color:var(--orange);">D</span><span style="color:var(--yellowgreen);">G</span><span style="color:var(--bluebell);">R</span></p>
+      <p class="brand-sub">add your hours or else</p>
+    </div>
+    <button class="gear" id="settingsToggle" aria-label="Settings">&#9881;</button>
+  </div>
+
+  <div class="settings-panel" id="settingsPanel" style="display:none;">
+    <label for="webhookUrl">Google Sheets web app URL</label>
+    <input type="text" id="webhookUrl" placeholder="https://script.google.com/macros/s/.../exec">
+    <div class="hint">Paste your Apps Script web app URL here so entries can sync to your sheet. Leave blank to log locally only, without syncing.</div>
+    <button class="save-btn" id="saveSettings">Save</button>
+
+    <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--line);">
+      <label for="newProjectInput">Add a project</label>
+      <input type="text" id="newProjectInput" placeholder="e.g. Spring Gala">
+      <button class="save-btn" id="addProjectBtn" style="margin-top:9px;">Add project</button>
+      <div class="hint">New projects show up in the dropdown right away. Remember to also add the name to your sheet's Project column dropdown, or that cell may show a validation warning.</div>
+      <div id="customProjectList" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <div class="ledger-line">
+    <div class="stat">
+      <span class="num" id="weekTotal">0</span>
+      <span class="lbl">hours this week</span>
+    </div>
+    <div class="stat">
+      <span class="num" id="entryCount">0</span>
+      <span class="lbl">entries this week</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="field">
+      <label for="dateInput">Date</label>
+      <div class="date-field">
+        <div class="date-display" id="dateDisplay">&nbsp;</div>
+        <input type="date" id="dateInput" class="date-native">
+      </div>
+    </div>
+    <div class="field">
+      <label for="projectInput">Project</label>
+      <select id="projectInput">
+        <option value="">Select a project</option>
+        <option>General Marketing</option>
+        <option>Music Partners</option>
+        <option>Suzuki</option>
+        <option>Music Therapy</option>
+        <option>Community Music School</option>
+        <option>BCC & BCCO</option>
+        <option>Development/Capital Campaign</option>
+        <option>House Party</option>
+        <option>Impact Report</option>
+        <option>Open Stages</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="hoursInput">Hours worked</label>
+      <div class="hours-row">
+        <button class="step-btn" id="minusBtn" type="button" aria-label="Subtract quarter hour">&minus;</button>
+        <input type="number" id="hoursInput" step="0.25" min="0" value="1">
+        <button class="step-btn" id="plusBtn" type="button" aria-label="Add quarter hour">+</button>
+      </div>
+    </div>
+    <div class="field">
+      <label for="descInput">What did you do</label>
+      <textarea id="descInput" placeholder="e.g. Fixed checkout bug, client call, updated homepage copy"></textarea>
+    </div>
+    <button class="submit-btn" id="submitBtn">
+      Log entry
+      <span class="stamp-mark" id="stampMark">logged!</span>
+    </button>
+    <div class="status" id="statusMsg"></div>
+  </div>
+
+  <div class="history">
+    <h3>Recent entries</h3>
+    <div id="historyList"></div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var SELF_URL = '';
+  var STORE_KEY = 'ledger-entries';
+  var SETTINGS_KEY = 'ledger-webhook-url';
+  var entries = [];
+  var webhookUrl = '';
+
+  var PROJECT_COLORS = {
+    'General Marketing': '#ED2127',
+    'Music Partners': '#00B9B0',
+    'Suzuki': '#F2A727',
+    'Music Therapy': '#4090CE',
+    'Community Music School': '#F15623',
+    'BCC & BCCO': '#9F4198',
+    'Development/Capital Campaign': '#CB005C',
+    'House Party': '#95C843',
+    'Impact Report': '#ED2127',
+    'Open Stages': '#F2A727'
+  };
+  var ACCENT_ROTATION = ['#ED2127','#F15623','#F2A727','#95C843','#00B9B0','#4090CE','#9F4198','#CB005C'];
+  var CUSTOM_PROJECTS_KEY = 'ledger-custom-projects';
+  var customProjects = [];
+
+  var dateInput = document.getElementById('dateInput');
+  var dateDisplay = document.getElementById('dateDisplay');
+  var projectInput = document.getElementById('projectInput');
+  var hoursInput = document.getElementById('hoursInput');
+  var descInput = document.getElementById('descInput');
+  var submitBtn = document.getElementById('submitBtn');
+  var stampMark = document.getElementById('stampMark');
+  var statusMsg = document.getElementById('statusMsg');
+  var historyList = document.getElementById('historyList');
+  var weekTotal = document.getElementById('weekTotal');
+  var entryCount = document.getElementById('entryCount');
+  var settingsToggle = document.getElementById('settingsToggle');
+  var settingsPanel = document.getElementById('settingsPanel');
+  var webhookInput = document.getElementById('webhookUrl');
+  var saveSettings = document.getElementById('saveSettings');
+  var newProjectInput = document.getElementById('newProjectInput');
+  var addProjectBtn = document.getElementById('addProjectBtn');
+  var customProjectList = document.getElementById('customProjectList');
+  var minusBtn = document.getElementById('minusBtn');
+  var plusBtn = document.getElementById('plusBtn');
+
+  function todayStr(){
+    var d = new Date();
+    var m = String(d.getMonth()+1).padStart(2,'0');
+    var day = String(d.getDate()).padStart(2,'0');
+    return d.getFullYear() + '-' + m + '-' + day;
+  }
+
+  function formatDisplayDate(isoStr){
+    if(!isoStr){ return 'Pick a date'; }
+    var d = new Date(isoStr + 'T00:00:00');
+    return d.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+  }
+
+  dateInput.addEventListener('change', function(){
+    dateDisplay.textContent = formatDisplayDate(dateInput.value);
+  });
+
+  function startOfWeek(){
+    var d = new Date();
+    var diff = d.getDate() - d.getDay() + (d.getDay() === 0 ? -6 : 1);
+    var monday = new Date(d.setDate(diff));
+    monday.setHours(0,0,0,0);
+    return monday;
+  }
+
+  function round(n){
+    return Math.round(n * 100) / 100;
+  }
+
+  function renderSummary(){
+    var monday = startOfWeek();
+    var total = 0, count = 0;
+    entries.forEach(function(e){
+      var ed = new Date(e.date + 'T00:00:00');
+      if(ed >= monday){
+        total += Number(e.hours) || 0;
+        count += 1;
+      }
+    });
+    weekTotal.textContent = round(total);
+    entryCount.textContent = count;
+  }
+
+  function renderHistory(){
+    historyList.innerHTML = '';
+    if(entries.length === 0){
+      var empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.textContent = 'Nothing logged yet. Your first entry will show up here.';
+      historyList.appendChild(empty);
+      return;
+    }
+    var sorted = entries.slice().sort(function(a,b){
+      return (b.date + b.createdAt) < (a.date + a.createdAt) ? -1 : 1;
+    });
+    sorted.slice(0, 8).forEach(function(e){
+      var row = document.createElement('div');
+      row.className = 'entry';
+
+      var top = document.createElement('div');
+      top.className = 'entry-top';
+      var descEl = document.createElement('div');
+      descEl.className = 'entry-desc';
+      descEl.textContent = e.description || '(no description)';
+      var hoursEl = document.createElement('div');
+      hoursEl.className = 'entry-hours';
+      hoursEl.textContent = e.hours + 'h';
+      top.appendChild(descEl);
+      top.appendChild(hoursEl);
+
+      var meta = document.createElement('div');
+      meta.className = 'entry-meta';
+      var left = document.createElement('div');
+      left.style.display = 'flex';
+      left.style.alignItems = 'center';
+      var tagEl = document.createElement('span');
+      tagEl.className = 'entry-tag';
+      tagEl.textContent = e.project || 'No project';
+      tagEl.style.background = PROJECT_COLORS[e.project] || '#8a8578';
+      var dateEl = document.createElement('span');
+      dateEl.className = 'entry-date';
+      dateEl.textContent = e.date;
+      left.appendChild(tagEl);
+      left.appendChild(dateEl);
+
+      var right = document.createElement('div');
+      right.style.display = 'flex';
+      right.style.alignItems = 'center';
+      var statusEl = document.createElement('span');
+      statusEl.className = 'entry-status ' + (e.synced ? 'synced' : 'unsynced');
+      statusEl.textContent = e.synced ? 'synced' : 'not synced';
+      var delBtn = document.createElement('button');
+      delBtn.className = 'del-btn';
+      delBtn.setAttribute('aria-label','Delete entry');
+      delBtn.textContent = '\u2715';
+      delBtn.addEventListener('click', function(){ deleteEntry(e.id); });
+      right.appendChild(statusEl);
+      right.appendChild(delBtn);
+
+      meta.appendChild(left);
+      meta.appendChild(right);
+
+      row.appendChild(top);
+      row.appendChild(meta);
+      historyList.appendChild(row);
+    });
+  }
+
+  function deleteEntry(id){
+    entries = entries.filter(function(e){ return e.id !== id; });
+    persistEntries();
+    renderHistory();
+    renderSummary();
+  }
+
+  function persistEntries(){
+    try{
+      localStorage.setItem(STORE_KEY, JSON.stringify(entries));
+    }catch(err){
+      console.error('Storage save failed', err);
+    }
+  }
+
+  function loadEntries(){
+    try{
+      var raw = localStorage.getItem(STORE_KEY);
+      entries = raw ? JSON.parse(raw) : [];
+    }catch(err){
+      entries = [];
+    }
+    renderHistory();
+    renderSummary();
+  }
+
+  function loadSettings(){
+    try{
+      var raw = localStorage.getItem(SETTINGS_KEY);
+      if(raw){
+        webhookUrl = raw;
+        webhookInput.value = webhookUrl;
+      }
+    }catch(err){
+      webhookUrl = '';
+    }
+  }
+
+  function loadCustomProjects(){
+    try{
+      var raw = localStorage.getItem(CUSTOM_PROJECTS_KEY);
+      customProjects = raw ? JSON.parse(raw) : [];
+    }catch(err){
+      customProjects = [];
+    }
+    assignCustomColors();
+    rebuildProjectDropdown();
+    renderCustomProjectList();
+  }
+
+  function persistCustomProjects(){
+    try{
+      localStorage.setItem(CUSTOM_PROJECTS_KEY, JSON.stringify(customProjects));
+    }catch(err){
+      console.error('Could not save custom projects', err);
+    }
+  }
+
+  function assignCustomColors(){
+    customProjects.forEach(function(name, i){
+      if(!PROJECT_COLORS[name]){
+        PROJECT_COLORS[name] = ACCENT_ROTATION[i % ACCENT_ROTATION.length];
+      }
+    });
+  }
+
+  function rebuildProjectDropdown(){
+    var current = projectInput.value;
+    Array.prototype.slice.call(projectInput.querySelectorAll('option[data-custom]')).forEach(function(opt){
+      opt.remove();
+    });
+    customProjects.forEach(function(name){
+      var opt = document.createElement('option');
+      opt.textContent = name;
+      opt.setAttribute('data-custom', '1');
+      projectInput.appendChild(opt);
+    });
+    projectInput.value = current;
+  }
+
+  function renderCustomProjectList(){
+    customProjectList.innerHTML = '';
+    customProjects.forEach(function(name){
+      var row = document.createElement('div');
+      row.className = 'custom-project-row';
+      var left = document.createElement('span');
+      var swatch = document.createElement('span');
+      swatch.className = 'swatch';
+      swatch.style.background = PROJECT_COLORS[name] || '#8a8578';
+      left.appendChild(swatch);
+      left.appendChild(document.createTextNode(name));
+      var removeBtn = document.createElement('button');
+      removeBtn.className = 'remove-project';
+      removeBtn.textContent = 'Remove';
+      removeBtn.addEventListener('click', function(){
+        customProjects = customProjects.filter(function(p){ return p !== name; });
+        persistCustomProjects();
+        rebuildProjectDropdown();
+        renderCustomProjectList();
+      });
+      row.appendChild(left);
+      row.appendChild(removeBtn);
+      customProjectList.appendChild(row);
+    });
+  }
+
+  addProjectBtn.addEventListener('click', function(){
+    var name = newProjectInput.value.trim();
+    if(!name){ return; }
+    var exists = customProjects.indexOf(name) !== -1 ||
+      Array.prototype.slice.call(projectInput.querySelectorAll('option')).some(function(o){
+        return o.textContent === name && !o.hasAttribute('data-custom');
+      });
+    if(exists){
+      newProjectInput.value = '';
+      return;
+    }
+    customProjects.push(name);
+    persistCustomProjects();
+    assignCustomColors();
+    rebuildProjectDropdown();
+    renderCustomProjectList();
+    newProjectInput.value = '';
+  });
+
+  settingsToggle.addEventListener('click', function(){
+    settingsPanel.style.display = settingsPanel.style.display === 'none' ? 'block' : 'none';
+  });
+
+  saveSettings.addEventListener('click', function(){
+    webhookUrl = webhookInput.value.trim();
+    try{
+      localStorage.setItem(SETTINGS_KEY, webhookUrl);
+      settingsPanel.style.display = 'none';
+    }catch(err){
+      alert('Could not save the URL, try again.');
+    }
+  });
+
+  minusBtn.addEventListener('click', function(){
+    var v = parseFloat(hoursInput.value) || 0;
+    v = Math.max(0, round(v - 0.25));
+    hoursInput.value = v;
+  });
+  plusBtn.addEventListener('click', function(){
+    var v = parseFloat(hoursInput.value) || 0;
+    v = round(v + 0.25);
+    hoursInput.value = v;
+  });
+
+  function setStatus(text, kind){
+    statusMsg.textContent = text;
+    statusMsg.className = 'status' + (kind ? ' ' + kind : '');
+  }
+
+  async function pushToSheet(entry){
+    var target = webhookUrl || SELF_URL || window.location.href;
+    if(!target){ return {ok:false, skipped:true}; }
+    try{
+      var res = await fetch(target, {
+        method: 'POST',
+        headers: {'Content-Type':'text/plain;charset=utf-8'},
+        body: JSON.stringify({
+          description: entry.description,
+          project: entry.project,
+          hours: entry.hours,
+          date: entry.date
+        })
+      });
+      if(!res.ok){ return {ok:false}; }
+      var body = await res.json();
+      if(body.status === 'ok'){ return {ok:true}; }
+      return {ok:false, message: body.message};
+    }catch(err){
+      return {ok:false};
+    }
+  }
+
+  submitBtn.addEventListener('click', async function(){
+    var date = dateInput.value;
+    var project = projectInput.value;
+    var hours = parseFloat(hoursInput.value);
+    var description = descInput.value.trim();
+
+    if(!date){
+      setStatus('Pick a date first.', 'err');
+      return;
+    }
+    if(!project){
+      setStatus('Choose a project.', 'err');
+      return;
+    }
+    if(!hours || hours <= 0){
+      setStatus('Enter hours greater than 0.', 'err');
+      return;
+    }
+    if(!description){
+      setStatus('Add a short description of the work.', 'err');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    setStatus('Logging...', '');
+
+    var entry = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2,7),
+      date: date,
+      project: project,
+      hours: round(hours),
+      description: description,
+      createdAt: new Date().toISOString(),
+      synced: false
+    };
+
+    var result = await pushToSheet(entry);
+    entry.synced = !!result.ok;
+
+    entries.push(entry);
+    persistEntries();
+    renderHistory();
+    renderSummary();
+
+    descInput.value = '';
+    hoursInput.value = 1;
+    projectInput.value = '';
+
+    stampMark.classList.remove('show');
+    void stampMark.offsetWidth;
+    stampMark.classList.add('show');
+
+    if(result.skipped){
+      setStatus('Saved locally. Add a Sheets URL in settings to sync.', 'ok');
+    } else if(result.ok){
+      setStatus('Logged and synced to your sheet.', 'ok');
+    } else if(result.message){
+      setStatus('Saved locally, but sync failed: ' + result.message, 'err');
+    } else {
+      setStatus('Saved locally, but sync failed. Check your webhook URL in settings.', 'err');
+    }
+
+    submitBtn.disabled = false;
+  });
+
+  dateInput.value = todayStr();
+  dateDisplay.textContent = formatDisplayDate(dateInput.value);
+  loadEntries();
+  loadSettings();
+  loadCustomProjects();
+})();
+</script>
+</body>
+</html>
